@@ -3,8 +3,8 @@ var diamondy = 300;
 
 var NS = "http://www.w3.org/2000/svg";
 var reverse = true;
-var yBar = 55; // 110
-var yText = 55;
+var yBar = 250;
+var yText = 195;
 var currentPI = 0;
 var startingMarker = 5;
 var itemCount = 0;
@@ -15,21 +15,15 @@ input.addEventListener('change',function(){
     var i = 0;
     var count = 0;
 
-    // //read the first PI of the document and get number of items
-    // readXlsxFile(input.files[0]).then((data) => {
-    //     //console.log(input.files[0]);
-    //     currentPI = data[1][1];
-    //     itemCount = data.length;
-    //     //console.log(itemCount*50)
-    // });
+    //read the first PI of the document and get number of items
+    readXlsxFile(input.files[0]).then((data) => {
+        //console.log(input.files[0]);
+        currentPI = data[1][1];
+        itemCount = data.length;
+        //console.log(itemCount*50)
+    });
 
     readXlsxFile(input.files[0]).then(function(rows) {
-        // read the first PI of the document and get number of items
-        currentPI = rows[1][1];
-        itemCount = rows.length;
-        console.log(currentPI);
-        console.log(itemCount);
-
         //add main axis
         var mainLine = document.createElementNS(NS,"line");
         mainLine.setAttribute("x1",0);
@@ -95,11 +89,6 @@ input.addEventListener('change',function(){
                     
                     currentPI = col[1];
                     startingMarker = startingMarker+piWidth;
-                    if(count != itemCount-1){
-                        yBar = 55; // 110
-                        yText = 55;
-                    }
-
                 }
                 
                 // Create "bar" for each item
@@ -107,14 +96,13 @@ input.addEventListener('change',function(){
                 bar.setAttribute("x1",diamondx);
                 bar.setAttribute("y1",diamondy);
                 bar.setAttribute("x2",diamondx);
-                // if(reverse){
-                //     yBar = 150;
-                // }
-                // else{
-                //     yBar = 450;
-                // }
+                if(reverse){
+                    yBar = 150;
+                }
+                else{
+                    yBar = 450;
+                }
                 bar.setAttribute("y2",yBar);
-                yBar += 20;
                 bar.setAttribute("style", "stroke:black; stroke-width:2");
                 console.log(bar);
                 timeline.appendChild(bar);
@@ -122,64 +110,48 @@ input.addEventListener('change',function(){
                 // Create diamond for the item
                 var diamond = document.createElementNS(NS, "rect");
                 console.log(diamond);
-                diamond.setAttribute("x", diamondx - 5); //Subtracting half the width and height of the square so that the bar falls in the diamond's center
-                diamond.setAttribute("y", diamondy - 5);
-                diamond.setAttribute("width", 10);
-                diamond.setAttribute("height", 10);
+                diamond.setAttribute("x", diamondx - 10); //Subtracting half the width and height of the square so that the bar falls in the diamond's center
+                diamond.setAttribute("y", diamondy - 10);
+                diamond.setAttribute("width", 20);
+                diamond.setAttribute("height", 20);
                 diamond.setAttribute("transform", "rotate(45,"+ diamondx + ","+diamondy+")"); // The second and third arguments of the rotate transformation indicate the point at which we want to transform the rectangle, in this case, its center
                 diamond.setAttribute("style", "fill:gray;stroke-width:3;stroke:blue");
                 timeline.appendChild(diamond);
 
                 // Add item text
+                var item = document.createElementNS(NS, "foreignObject");
+                item.setAttribute("x",diamondx-30);
+                if(reverse){
+                    yText = 95;
+                    reverse = false;
+                }
+                else{
+                    yText = 440;
+                    reverse = true;
+                }
+                item.setAttribute("y",yText);
+                item.setAttribute("width",100);
+                item.setAttribute("height",100);
+                item.setAttribute("overflow", "visible");
 
-                var item = document.createElementNS(NS,"text");
-                item.setAttribute("x", diamondx+5); // diamondx -30
-                item.setAttribute("y", yText+5);
-                yText += 20;
-                item.setAttribute("style", "font-size: 12px");
-                item.innerHTML = col[0];
-                timeline.appendChild(item);
+                var p = document.createElement("p")
+                p.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+                p.setAttribute("style", "font-size: 12px;content: attr(data-hover)")
+
+                p.innerHTML = col[0];
+                p.onmouseover = function(){
+                    p.innerHTML = col[2];
+                    // I could probably show the dependencies like this
+                }
+                p.onmouseout = function(){
+                    p.innerHTML = col[0];
+                    // Go back to item name like this
+                }
+                item.appendChild(p);
+
+                
                 console.log(item);
-                // var item = document.createElementNS(NS, "foreignObject");
-                // item.setAttribute("x",diamondx-30);
-                // // if(reverse){
-                // //     yText = 95;
-                // //     reverse = false;
-                // // }
-                // // else{
-                // //     yText = 440; 
-                // //     reverse = true;
-                // // }
-                // item.setAttribute("y",yText);
-                // yText += 10;
-                // item.setAttribute("width",100);
-                // item.setAttribute("height",20);
-                // item.setAttribute("overflow", "visible");
-                
-                // // var p = document.createElement("div")
-                // // p.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-                // // p.setAttribute("style", "width:"+100+"; height:20; overflow-y:auto; text-align:center")
-                // // p.innerHTML = col[0];
-                // // item.appendChild(p);
-                
-                // var p = document.createElement("p")
-                // p.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-                // p.setAttribute("style", "font-size: 12px;content: attr(data-hover)")
-
-                // p.innerHTML = col[0];
-                // p.onmouseover = function(){
-                //     p.innerHTML = col[2];
-                //     // I could probably show the dependencies like this
-                // }
-                // p.onmouseout = function(){
-                //     p.innerHTML = col[0];
-                //     // Go back to item name like this
-                // }
-                // item.appendChild(p);
-                
-                
-                // console.log(item);
-                // timeline.appendChild(item);
+                timeline.appendChild(item);
 
                 i = i+50;
                 diamondx = diamondx+50
@@ -188,8 +160,5 @@ input.addEventListener('change',function(){
 
         })
     });
-
-    console.log("why does this happen first?");
 });
 
-console.log("when will this happen?");
